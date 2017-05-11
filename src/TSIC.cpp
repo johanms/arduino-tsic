@@ -85,9 +85,22 @@ uint8_t TSIC::getTemperature(uint16_t *temp_value16){
 //-------------Unterprogramme-----------------------------------------------------------------------
 
 /*	Temperature conversion from uint to float in °C with 1 decimal place.
+	The calculation uses the formula found in the datasheet of the sensors.
+*/
+float TSIC::calcCelsius(uint16_t *temperature16){
+	// formula: temp_value/2047*(HT-LT)+LT 
+	if(m_sens_type==1) { // 50x sensors: LT=-10, HT=60
+		return *temperature16 * (70.0 / 2047.0) - 10.0;
+	}
+	else { // 20x,30x sensors: LT=-50, HT=150
+		return *temperature16 * (200.0 / 2047.0) - 50.0;
+	}
+}
+
+/*	Temperature conversion from uint to float in °C with 1 decimal place.
 	The calculation is speed-optimized at the cost of a sligtly worse temperature resolution (about -0,0366°C @25°C).
 */
-float TSIC::calc_Celsius(uint16_t *temperature16){
+float TSIC::calcCelsiusOptimized(uint16_t *temperature16){
 	int16_t temp_value16 = 0;
 	float celsius = 0;
 
